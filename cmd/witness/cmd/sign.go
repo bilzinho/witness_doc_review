@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 
@@ -46,8 +45,12 @@ func SignCmd() *cobra.Command {
 //todo: this logic should be broken out and moved to pkg/
 //we need to abstract where keys are coming from, etc
 func runSign(so options.SignOptions) error {
-	ctx := context.Background()
-	signers, errors := loadSigners(ctx, so.KeyOptions)
+	if so.KeyOptions.FulcioURL != "" {
+		err := fmt.Errorf("fulcio url is not supported for signing")
+		return err
+	}
+
+	signers, errors := getSigners(so.KeyOptions)
 	if len(errors) > 0 {
 		for _, err := range errors {
 			log.Error(err)
